@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>IFRO Shopping System</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background: linear-gradient(to right,#1e3c72,#2a5298);
+    color:white;
+}
+
+header{
+    background:#111;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+nav button{
+    background:#2a5298;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    margin-left:10px;
+    cursor:pointer;
+}
+
+section{
+    display:none;
+    padding:20px;
+}
+
+.active{
+    display:block;
+}
+
+.product-container{
+    display:flex;
+    flex-wrap:wrap;
+}
+
+.product-card{
+    background:white;
+    color:black;
+    padding:10px;
+    margin:10px;
+    width:200px;
+    border-radius:8px;
+    text-align:center;
+}
+
+.product-card img{
+    width:150px;
+    height:150px;
+    object-fit:cover;
+}
+
+button.action{
+    background:#2a5298;
+    color:white;
+    border:none;
+    padding:5px 10px;
+    margin-top:5px;
+    cursor:pointer;
+}
+
+input{
+    padding:5px;
+    margin:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>🛒 IFRO Shopping System</h2>
+    <nav>
+        <button onclick="showPage('home')">Home</button>
+        <button onclick="showPage('cart')">Cart</button>
+        <button onclick="showPage('admin')">Admin</button>
+    </nav>
+</header>
+
+<!-- HOME PAGE -->
+<section id="home" class="active">
+    <h3>Products</h3>
+    <div id="productList" class="product-container"></div>
+</section>
+
+<!-- CART PAGE -->
+<section id="cart">
+    <h3>Your Cart</h3>
+    <div id="cartList"></div>
+    <h3>Total: ₹ <span id="total">0</span></h3>
+</section>
+
+<!-- ADMIN PAGE -->
+<section id="admin">
+    <h3>Admin Panel</h3>
+    <input type="text" id="pname" placeholder="Product Name">
+    <input type="number" id="pprice" placeholder="Price">
+    <input type="text" id="pimage" placeholder="Image URL">
+    <button class="action" onclick="addProduct()">Add Product</button>
+</section>
+
+<script>
+let products = JSON.parse(localStorage.getItem("products")) || [
+    {name:"Laptop", price:50000, image:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8"},
+    {name:"Mobile", price:20000, image:"https://images.unsplash.com/photo-1511707171634-5f897ff02aa9"},
+    {name:"Headphones", price:2000, image:"https://images.unsplash.com/photo-1518444028785-8fbcd101ebb9"}
+];
+
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+function saveData(){
+    localStorage.setItem("products", JSON.stringify(products));
+    localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function showPage(page){
+    document.querySelectorAll("section").forEach(sec=>{
+        sec.classList.remove("active");
+    });
+    document.getElementById(page).classList.add("active");
+}
+
+function displayProducts(){
+    let container = document.getElementById("productList");
+    container.innerHTML="";
+    products.forEach((p,index)=>{
+        container.innerHTML += `
+        <div class="product-card">
+            <img src="${p.image}">
+            <h4>${p.name}</h4>
+            <p>₹${p.price}</p>
+            <button class="action" onclick="addToCart(${index})">Add to Cart</button>
+        </div>`;
+    });
+}
+
+function addToCart(index){
+    cart.push(products[index]);
+    saveData();
+    alert("Added to Cart");
+    displayCart();
+}
+
+function displayCart(){
+    let container = document.getElementById("cartList");
+    let total=0;
+    container.innerHTML="";
+    cart.forEach((c,i)=>{
+        total+=c.price;
+        container.innerHTML+=`
+        <p>${c.name} - ₹${c.price}
+        <button class="action" onclick="removeFromCart(${i})">Remove</button></p>`;
+    });
+    document.getElementById("total").innerText=total;
+}
+
+function removeFromCart(index){
+    cart.splice(index,1);
+    saveData();
+    displayCart();
+}
+
+function addProduct(){
+    let name=document.getElementById("pname").value;
+    let price=document.getElementById("pprice").value;
+    let image=document.getElementById("pimage").value;
+
+    if(name && price && image){
+        products.push({name:name, price:parseInt(price), image:image});
+        saveData();
+        displayProducts();
+        alert("Product Added Successfully");
+    } else {
+        alert("Fill all fields");
+    }
+}
+
+displayProducts();
+displayCart();
+</script>
+
+</body>
+</html>
